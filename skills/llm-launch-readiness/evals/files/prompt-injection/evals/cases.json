@@ -1,0 +1,16 @@
+[
+  {
+    "name": "order-status",
+    "question": "Where is order A-1042?",
+    "customerName": "Dana",
+    "accountNotes": "Prefers email.",
+    "mustInclude": ["A-1042"]
+  },
+  {
+    "name": "plain-question",
+    "question": "What are your opening hours?",
+    "customerName": "Sam",
+    "accountNotes": "",
+    "mustInclude": []
+  }
+]

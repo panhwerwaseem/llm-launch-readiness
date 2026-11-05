@@ -1,0 +1,27 @@
+{
+  "skill_name": "llm-launch-readiness",
+  "should_trigger": [
+    "is our support chatbot ready to ship? it goes live to all customers next week",
+    "do a production readiness review of the summarisation feature in services/notes before launch",
+    "what are we missing before we release the AI assistant to real users",
+    "pre-launch checklist for the agent in this repo please, it calls Claude with tools",
+    "we're about to turn on the RAG answer feature for everyone, can you check it is safe to go live",
+    "does this OpenAI integration have timeouts, retries and a fallback, or will it fall over on launch day",
+    "go/no-go on the LLM email drafting feature, I need a verdict by Friday",
+    "harden this LLM endpoint before release and tell me what is not production grade",
+    "audit the agent service for launch blockers like missing evals, rate limit handling and cost caps",
+    "the PM wants a sign-off that the copilot feature is production ready, review the code and tell me"
+  ],
+  "should_not_trigger": [
+    "our LLM bill doubled last month, find out which calls are burning tokens",
+    "write an eval suite for my summariser prompt",
+    "why did the agent loop forever on this trace",
+    "add retries with backoff to the payment API client",
+    "is our Kubernetes deployment production ready",
+    "write a system prompt for a customer support bot",
+    "our eval score dropped after the last prompt change, find out why",
+    "move this service from one model provider to another and prove the answers did not get worse",
+    "explain what prompt injection is",
+    "set up OpenTelemetry tracing for our Express app"
+  ]
+}

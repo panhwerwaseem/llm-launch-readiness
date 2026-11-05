@@ -1,0 +1,12 @@
+{
+  "name": "llm-launch-readiness",
+  "description": "Checks an LLM or agent feature before release for timeouts, retries, rate-limit handling, output limits, fallbacks, usage logging, tracing, evals, hard-coded keys, prompt-injection paths and error handling, with file and line evidence.",
+  "author": {
+    "name": "Muhammad Waseem Panhwar",
+    "url": "https://github.com/panhwerwaseem"
+  },
+  "homepage": "https://github.com/panhwerwaseem/llm-launch-readiness",
+  "repository": "https://github.com/panhwerwaseem/llm-launch-readiness",
+  "license": "MIT",
+  "keywords": ["llm", "production-readiness", "launch-checklist", "ai-agents", "agent-skills"]
+}

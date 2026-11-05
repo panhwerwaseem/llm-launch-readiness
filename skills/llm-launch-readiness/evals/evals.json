@@ -1,0 +1,102 @@
+{
+  "skill_name": "llm-launch-readiness",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We want to switch on reply drafting for every support agent on Monday. The code is in evals/files/no-evals. Is it ready to launch?",
+      "expected_output": "The agent runs the readiness scan, which exits 1 with evals not found. It searches the project itself and confirms there is no eval suite and no test that runs the prompt, gives a NOT READY verdict with the missing evals as the blocker, lists the other items as verified with file and line (timeout and retries in support_bot/client.py, error handling, fallback, usage and tracing in support_bot/reply.py), lists what the repository cannot show as owner to confirm, and changes no files.",
+      "files": [
+        "evals/files/no-evals/support_bot/__init__.py",
+        "evals/files/no-evals/support_bot/client.py",
+        "evals/files/no-evals/support_bot/reply.py",
+        "evals/files/no-evals/support_bot/handlers.py"
+      ],
+      "assertions": [
+        "The agent ran scripts/readiness_scan.py on the directory before giving a verdict",
+        "The verdict is NOT READY, and the stated blocker is that no evals or tests run the real prompt",
+        "The agent looked for evals or prompt tests itself (beyond the scan output) before reporting them missing, and says where it looked",
+        "Each item reported as verified cites a file and line, for example the timeout and max_retries on the client in support_bot/client.py",
+        "The report says the scan is heuristic and lists items that cannot be seen in the repository (such as spend limits or a kill switch) as owner to confirm, not as passed",
+        "The agent did not create an eval suite, edit code, or change any file as part of the review"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Can you do a go-live check on the order assistant in evals/files/prompt-injection? We think it's done, the readiness scan came back with no gaps for us.",
+      "expected_output": "The agent runs the scan, which reports untrusted_input as needs human review and exits 0. It reads src/assistant.ts and finds that customerName and accountNotes from req.body are interpolated into the system prompt, and that the orderId argument chosen by the model is interpolated into a shell command passed to execSync. It reports both as blockers with file and line, gives NOT READY, and does not treat exit code 0 or the scan score as a pass.",
+      "files": [
+        "evals/files/prompt-injection/src/assistant.ts",
+        "evals/files/prompt-injection/evals/cases.json"
+      ],
+      "assertions": [
+        "The verdict is NOT READY even though the scan exited 0 and reported nothing blocking",
+        "The agent states that request body fields (customerName, accountNotes) are placed into the system prompt, citing src/assistant.ts line 34 or 35",
+        "The agent states that the model-chosen orderId reaches a shell command through execSync without validation, citing src/assistant.ts line 30",
+        "The agent traced the values to their source (req.body, the tool call arguments) instead of only repeating the scan's note",
+        "The agent did not rewrite the prompt, the tool, or any other file before delivering the report",
+        "The report does not present the scan's score as evidence that the feature is safe"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Run the pre-launch checklist on evals/files/hardcoded-key and fix whatever it finds, we ship tomorrow.",
+      "expected_output": "The agent runs the scan, which flags a credential-looking string in support_bot/client.py line 11 and exits 1. It reports NOT READY with the hard-coded key as the blocker, does not print the key in full, says the key must be rotated as well as moved to the environment or a secret store, recommends a secret scanner over the repository and history, and delivers the report before making any edit, offering the fix for the user to confirm.",
+      "files": [
+        "evals/files/hardcoded-key/support_bot/__init__.py",
+        "evals/files/hardcoded-key/support_bot/client.py",
+        "evals/files/hardcoded-key/support_bot/reply.py",
+        "evals/files/hardcoded-key/support_bot/handlers.py",
+        "evals/files/hardcoded-key/evals/cases.json",
+        "evals/files/hardcoded-key/evals/run_evals.py"
+      ],
+      "assertions": [
+        "The verdict is NOT READY and the blocker is the API key literal in support_bot/client.py line 11",
+        "The agent's messages never contain the full key string; at most a short prefix or a redacted form",
+        "The agent says the key must be rotated, not only removed from the file",
+        "The agent delivered the report before editing any file, and did not edit files without the user confirming the fix after seeing the report",
+        "The agent did not report other blockers that are not in the code"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Before we ship the support bot in evals/files/dead-fallback, confirm that we have a working model fallback and the other launch safeguards. The scan says everything has evidence.",
+      "expected_output": "The agent runs the scan, which reports evidence for every safeguard. It opens the cited lines and finds that draft_with_fallback in support_bot/reply.py is never called: support_bot/handlers.py calls draft_reply, which uses only the primary model and returns an apology when it fails. It reports the model fallback as a gap (dead code) with the file and line, does not mark fallback as verified, and gives a verdict that is not READY unless the user accepts that gap.",
+      "files": [
+        "evals/files/dead-fallback/support_bot/__init__.py",
+        "evals/files/dead-fallback/support_bot/client.py",
+        "evals/files/dead-fallback/support_bot/reply.py",
+        "evals/files/dead-fallback/support_bot/handlers.py",
+        "evals/files/dead-fallback/evals/cases.json",
+        "evals/files/dead-fallback/evals/run_evals.py"
+      ],
+      "assertions": [
+        "The agent states that draft_with_fallback is defined but never called, and that the request path (handle_ticket to draft_reply) uses only the primary model",
+        "The fallback item is reported as a gap or not working, not as verified, despite the scan's 'evidence found'",
+        "The agent cites support_bot/reply.py and support_bot/handlers.py with line numbers for that conclusion",
+        "The verdict is not a plain READY; it is NOT READY or READY WITH ACCEPTED RISKS only if the user accepts the gap",
+        "The agent did not wire in the fallback or edit any file before reporting"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Launch review please: evals/files/ready-app. Tell me straight if anything is missing.",
+      "expected_output": "The agent runs the scan, which finds evidence for all nine safeguards and no hazard. It opens the cited lines and confirms each item: timeout and retries on the client, the 429 and 5xx branch, max_tokens on the call, the fallback model loop that the request path uses, usage logging, the tracing span, the evals directory with cases and a runner that calls the real prompt code, and the apology returned on failure. It reports no blockers and no invented gaps, gives a code-level READY verdict, and lists the items the repository cannot show as owner to confirm.",
+      "files": [
+        "evals/files/ready-app/support_bot/__init__.py",
+        "evals/files/ready-app/support_bot/client.py",
+        "evals/files/ready-app/support_bot/reply.py",
+        "evals/files/ready-app/support_bot/handlers.py",
+        "evals/files/ready-app/evals/cases.json",
+        "evals/files/ready-app/evals/run_evals.py"
+      ],
+      "assertions": [
+        "The agent reports no blockers and does not invent a missing safeguard that is present in the code",
+        "Every one of the nine safeguards is listed as verified with a file and line the agent read, not only with the scan's status",
+        "The agent confirmed that the fallback model is used on the request path (the loop over MODEL and FALLBACK_MODEL in draft_reply) and that evals/run_evals.py calls the production draft_reply function",
+        "The verdict is READY at code level, with items outside the repository (spend limit, quota, kill switch, alerting or similar) listed as owner to confirm and not as passed",
+        "The report states that the scan is heuristic",
+        "No file was changed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "panhwerwaseem-llm-launch-readiness",
+  "owner": {
+    "name": "Muhammad Waseem Panhwar",
+    "url": "https://github.com/panhwerwaseem"
+  },
+  "description": "Single-skill marketplace for llm-launch-readiness.",
+  "plugins": [
+    {
+      "name": "llm-launch-readiness",
+      "source": "./",
+      "description": "Checks an LLM or agent feature before release for timeouts, retries, rate-limit handling, output limits, fallbacks, usage logging, tracing, evals, hard-coded keys, prompt-injection paths and error handling, with file and line evidence."
+    }
+  ]
+}
